@@ -1,11 +1,12 @@
 {
-  "id": "marketeer",
-  "name": "marketeer",
+  "id": "synaads",
+  "name": "synaads",
+  "namespace": "Plugin\\SynaAds",
   "version": "1.0.8",
-  "displayName": "Marketeer Campaign Generator",
+  "displayName": "SynaAds",
   "description": "AI-powered marketing campaign generator: landing pages, Google Ads copy, social media posts, keyword lists, compliance checks, and multi-language support",
   "author": "Synaplan",
-  "homepage": "https://github.com/metadist/synaplan-marketing",
+  "homepage": "https://github.com/metadist/synaplan-synaads",
   "license": "MIT",
   "minSynaplanVersion": "1.0.0",
   "capabilities": ["api", "frontend", "migrations"],
@@ -54,12 +55,12 @@
     "001_setup.sql"
   ],
   "hooks": {
-    "onInstall": "Plugin\\Marketeer\\Service\\MarketeerInstallService::seedDefaults"
+    "onInstall": "Plugin\\SynaAds\\Service\\SynaAdsInstallService::seedDefaults"
   },
   "config": {
-    "group": "P_marketeer",
+    "group": "P_synaads",
     "settings": [
-      {"key": "enabled", "type": "boolean", "default": true, "description": "Enable Marketeer plugin"},
+      {"key": "enabled", "type": "boolean", "default": true, "description": "Enable SynaAds plugin"},
       {"key": "default_language", "type": "string", "default": "en", "description": "Default language for content"},
       {"key": "cta_url", "type": "string", "default": "https://web.synaplan.com", "description": "Default CTA URL"},
       {"key": "brand_name", "type": "string", "default": "Synaplan", "description": "Brand name in generated content"},
