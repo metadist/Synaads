@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Marketeer Plugin MVP — Integration Test
-# Usage: ./test-marketeer.sh <api_key> [base_url] [user_id]
+# SynaAds Plugin MVP — Integration Test
+# Usage: ./test-synaads.sh <api_key> [base_url] [user_id]
 
 API_KEY="${1:?Usage: $0 <api_key> [base_url] [user_id]}"
 BASE="${2:-http://localhost:8000}"
 USER_ID="${3:-1}"
-URL="$BASE/api/v1/user/$USER_ID/plugins/marketeer"
+URL="$BASE/api/v1/user/$USER_ID/plugins/synaads"
 PASS=0
 FAIL=0
 SLUG="mvptest$$"
@@ -42,7 +42,7 @@ check_false() {
   fi
 }
 
-echo "=== Marketeer MVP Test Suite ==="
+echo "=== SynaAds MVP Test Suite ==="
 echo "    Target: $URL"
 echo ""
 

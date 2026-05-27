@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * Manages file storage for generated landing pages, images, and keyword files.
  *
  * Directory structure under user uploads:
- *   marketeer/{campaign-slug}/{language}/
+ *   synaads/{campaign-slug}/{language}/
  *     ├── index.html
  *     ├── keywords.txt
  *     ├── images/
@@ -25,6 +25,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 final readonly class LandingPageService
 {
+    private const STORAGE_DIR = 'synaads';
+
     public function __construct(
         #[Autowire('%app.upload_dir%')] private string $uploadDir,
         private UserUploadPathBuilder $pathBuilder,
@@ -60,7 +62,7 @@ final readonly class LandingPageService
         $filePath = $dir . '/index.html';
         file_put_contents($filePath, $html);
 
-        return "marketeer/{$campaignSlug}/{$language}/index.html";
+        return self::STORAGE_DIR . "/{$campaignSlug}/{$language}/index.html";
     }
 
     /**
@@ -76,7 +78,7 @@ final readonly class LandingPageService
         $filePath = $dir . '/keywords.txt';
         file_put_contents($filePath, implode("\n", $keywords) . "\n");
 
-        return "marketeer/{$campaignSlug}/{$language}/keywords.txt";
+        return self::STORAGE_DIR . "/{$campaignSlug}/{$language}/keywords.txt";
     }
 
     /**
@@ -119,7 +121,7 @@ final readonly class LandingPageService
             }
         }
 
-        return "marketeer/{$campaignSlug}/{$language}/videos/{$filename}";
+        return self::STORAGE_DIR . "/{$campaignSlug}/{$language}/videos/{$filename}";
     }
 
     /**
@@ -152,7 +154,7 @@ final readonly class LandingPageService
             }
         }
 
-        return "marketeer/{$campaignSlug}/{$language}/images/{$filename}";
+        return self::STORAGE_DIR . "/{$campaignSlug}/{$language}/images/{$filename}";
     }
 
     /**
@@ -221,7 +223,7 @@ final readonly class LandingPageService
     public function createZip(int $userId, string $campaignSlug): string
     {
         $campaignDir = $this->getCampaignDir($userId, $campaignSlug);
-        $zipPath = sys_get_temp_dir() . "/marketeer_{$campaignSlug}_" . uniqid() . '.zip';
+        $zipPath = sys_get_temp_dir() . '/' . self::STORAGE_DIR . "_{$campaignSlug}_" . uniqid() . '.zip';
 
         $zip = new \ZipArchive();
         $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
@@ -247,7 +249,7 @@ final readonly class LandingPageService
 
     public function getCampaignDir(int $userId, string $campaignSlug): string
     {
-        return $this->getUserUploadDir($userId) . '/marketeer/' . $campaignSlug;
+        return $this->getUserUploadDir($userId) . '/' . self::STORAGE_DIR . '/' . $campaignSlug;
     }
 
     /**

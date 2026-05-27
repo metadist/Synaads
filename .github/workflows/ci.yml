@@ -18,21 +18,21 @@ jobs:
       - name: Validate manifest.json
         run: |
           echo "Checking manifest.json is valid JSON..."
-          python3 -c "import json; json.load(open('marketeer-plugin/manifest.json'))"
+          python3 -c "import json; json.load(open('synaads-plugin/manifest.json'))"
           echo "✅ manifest.json is valid"
 
       - name: Check required files exist
         run: |
           MISSING=0
           for f in \
-            marketeer-plugin/manifest.json \
-            marketeer-plugin/frontend/index.js \
-            marketeer-plugin/backend/Controller/MarketeerController.php \
-            marketeer-plugin/backend/Controller/MarketeerPublicController.php \
-            marketeer-plugin/backend/Service/ContentGenerator.php \
-            marketeer-plugin/backend/Service/LandingPageService.php \
-            marketeer-plugin/backend/Service/MarketeerInstallService.php \
-            marketeer-plugin/migrations/001_setup.sql; do
+            synaads-plugin/manifest.json \
+            synaads-plugin/frontend/index.js \
+            synaads-plugin/backend/Controller/SynaAdsController.php \
+            synaads-plugin/backend/Controller/SynaAdsPublicController.php \
+            synaads-plugin/backend/Service/ContentGenerator.php \
+            synaads-plugin/backend/Service/LandingPageService.php \
+            synaads-plugin/backend/Service/SynaAdsInstallService.php \
+            synaads-plugin/migrations/001_setup.sql; do
             if [ ! -f "$f" ]; then
               echo "❌ Missing: $f"
               MISSING=1
@@ -70,7 +70,7 @@ jobs:
               php -l "$file"
               ERRORS=1
             fi
-          done < <(find marketeer-plugin -name '*.php' -type f)
+          done < <(find synaads-plugin -name '*.php' -type f)
 
           if [ "$ERRORS" -eq 1 ]; then
             exit 1
@@ -86,7 +86,7 @@ jobs:
               echo "⚠️  Missing strict_types: $file"
               ERRORS=1
             fi
-          done < <(find marketeer-plugin -name '*.php' -type f)
+          done < <(find synaads-plugin -name '*.php' -type f)
 
           if [ "$ERRORS" -eq 1 ]; then
             echo "::warning::Some PHP files are missing declare(strict_types=1)"
@@ -109,14 +109,14 @@ jobs:
       - name: JavaScript syntax check
         run: |
           echo "Checking index.js syntax..."
-          node --check marketeer-plugin/frontend/index.js
+          node --check synaads-plugin/frontend/index.js
           echo "✅ index.js passes syntax check"
 
       - name: Check module exports
         run: |
           echo "Checking that index.js exports a mount function..."
           node -e "
-            const m = await import('./marketeer-plugin/frontend/index.js');
+            const m = await import('./synaads-plugin/frontend/index.js');
             if (typeof m.default?.mount !== 'function') {
               console.error('❌ index.js must export default { mount(el, context) }');
               process.exit(1);
@@ -126,7 +126,7 @@ jobs:
 
       - name: Check for console.log leaks
         run: |
-          if grep -n 'console\.log\b' marketeer-plugin/frontend/index.js; then
+          if grep -n 'console\.log\b' synaads-plugin/frontend/index.js; then
             echo "::warning::Found console.log statements in index.js — consider removing before release"
           else
             echo "✅ No console.log statements found"
@@ -151,9 +151,9 @@ jobs:
       - name: Verify manifest routes match controller
         run: |
           echo "Cross-checking manifest routes against controller annotations..."
-          MANIFEST="marketeer-plugin/manifest.json"
-          CONTROLLER="marketeer-plugin/backend/Controller/MarketeerController.php"
-          PUBLIC_CONTROLLER="marketeer-plugin/backend/Controller/MarketeerPublicController.php"
+          MANIFEST="synaads-plugin/manifest.json"
+          CONTROLLER="synaads-plugin/backend/Controller/SynaAdsController.php"
+          PUBLIC_CONTROLLER="synaads-plugin/backend/Controller/SynaAdsPublicController.php"
 
           ROUTE_COUNT=$(python3 -c "
           import json
@@ -174,7 +174,7 @@ jobs:
       - name: Verify ContentGenerator prompt templates
         run: |
           echo "Checking ContentGenerator has required prompt templates..."
-          CG="marketeer-plugin/backend/Service/ContentGenerator.php"
+          CG="synaads-plugin/backend/Service/ContentGenerator.php"
 
           ERRORS=0
           for tmpl in DEFAULT_LANDING_PAGE_PROMPT DEFAULT_IMAGE_PROMPT DEFAULT_VIDEO_PROMPT; do
@@ -203,7 +203,7 @@ jobs:
       - name: Verify migration SQL syntax
         run: |
           echo "Checking migration files..."
-          for f in marketeer-plugin/migrations/*.sql; do
+          for f in synaads-plugin/migrations/*.sql; do
             if [ ! -s "$f" ]; then
               echo "❌ Empty migration: $f"
               exit 1

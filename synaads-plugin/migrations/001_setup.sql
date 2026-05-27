@@ -1,4 +1,4 @@
--- Marketeer Plugin Migration 001: Initial Setup
+-- SynaAds Plugin Migration 001: Initial Setup
 -- Run per-user when the plugin is installed.
 -- Uses generic plugin_data table for campaign/page/ad_copy storage (non-invasive).
 -- Placeholders: :userId, :group

@@ -1,4 +1,4 @@
-# Synaplan Marketeer Plugin
+# Synaplan SynaAds Plugin
 
 AI-powered marketing campaign generator for [Synaplan](https://github.com/metadist/synaplan). Creates landing pages, Google Ads campaigns, ad copy, social media graphics, and videos — all from a single campaign brief.
 
@@ -14,8 +14,8 @@ AI-powered marketing campaign generator for [Synaplan](https://github.com/metadi
 ## Repository Structure
 
 ```
-synaplan-marketing/
-├── marketeer-plugin/     # Plugin source code (install into Synaplan)
+synaplan-synaads/
+├── synaads-plugin/       # Plugin source code (install into Synaplan)
 │   ├── backend/          #   Symfony controllers & services
 │   ├── frontend/         #   Plugin UI (vanilla JS)
 │   ├── migrations/       #   Database setup
@@ -38,7 +38,7 @@ Synaplan uses **automatic plugin discovery** — no config file edits are needed
 
 ```bash
 git clone https://github.com/metadist/synaplan.git
-git clone https://github.com/metadist/synaplan-marketing.git
+git clone https://github.com/metadist/synaplan-synaads.git
 ```
 
 Your directory layout should look like:
@@ -46,13 +46,13 @@ Your directory layout should look like:
 ```
 your-workspace/
 ├── synaplan/                 # Main application
-└── synaplan-marketing/       # This repo
+└── synaplan-synaads/         # This repo
 ```
 
 ### 2. Copy the plugin into Synaplan
 
 ```bash
-cp -r synaplan-marketing/marketeer-plugin synaplan/plugins/marketeer
+cp -r synaplan-synaads/synaads-plugin synaplan/plugins/synaads
 ```
 
 Synaplan's Kernel scans `plugins/*/manifest.json` on boot to auto-register services and routes. No changes to `composer.json`, `routes.yaml`, or `services.yaml` are required.
@@ -68,21 +68,21 @@ docker compose up -d
 
 ```bash
 docker compose exec backend php bin/console cache:clear
-docker compose exec backend php bin/console app:plugin:install <userId> marketeer
+docker compose exec backend php bin/console app:plugin:install <userId> synaads
 ```
 
 Replace `<userId>` with the target user's ID (typically `1` for the first admin user). This command:
 
-- Runs the migration in `migrations/001_setup.sql` which writes default settings to `BCONFIG` with group `P_marketeer`
-- Calls the `MarketeerInstallService::seedDefaults` hook to create a sample campaign
-- Enables the plugin for that user (`P_marketeer.enabled = 1`)
+- Runs the migration in `migrations/001_setup.sql` which writes default settings to `BCONFIG` with group `P_synaads`
+- Calls the `SynaAdsInstallService::seedDefaults` hook to create a sample campaign
+- Enables the plugin for that user (`P_synaads.enabled = 1`)
 
 ### 5. Access the plugin
 
-Open Synaplan in your browser and navigate to **Plugins > Marketeer** in the sidebar, or go directly to:
+Open Synaplan in your browser and navigate to **Plugins > SynaAds** in the sidebar, or go directly to:
 
 ```
-http://localhost:5173/plugins/marketeer
+http://localhost:5173/plugins/synaads
 ```
 
 ### Activate for all existing users (production)
@@ -90,7 +90,7 @@ http://localhost:5173/plugins/marketeer
 To install the plugin for every active, verified user at once:
 
 ```bash
-docker compose exec backend php bin/console app:plugin:install-verified-users marketeer
+docker compose exec backend php bin/console app:plugin:install-verified-users synaads
 ```
 
 ### Auto-activate for new users
@@ -98,7 +98,7 @@ docker compose exec backend php bin/console app:plugin:install-verified-users ma
 To have the plugin automatically installed when new users register, set the `DEFAULT_USER_PLUGINS` environment variable in the backend `.env`:
 
 ```env
-DEFAULT_USER_PLUGINS='["marketeer"]'
+DEFAULT_USER_PLUGINS='["synaads"]'
 ```
 
 This is a JSON array — add alongside any other default plugins.
@@ -109,7 +109,7 @@ Check that the plugin is responding:
 
 ```bash
 curl -s -H "X-API-Key: <your-api-key>" \
-  http://localhost:8000/api/v1/user/<userId>/plugins/marketeer/setup-check
+  http://localhost:8000/api/v1/user/<userId>/plugins/synaads/setup-check
 ```
 
 A successful response returns `{ "success": true, ... }` with the plugin's configuration status.
@@ -119,8 +119,8 @@ A successful response returns `{ "success": true, ... }` with the plugin's confi
 After pulling new changes from this repository:
 
 ```bash
-rm -rf synaplan/plugins/marketeer
-cp -r synaplan-marketing/marketeer-plugin synaplan/plugins/marketeer
+rm -rf synaplan/plugins/synaads
+cp -r synaplan-synaads/synaads-plugin synaplan/plugins/synaads
 cd synaplan
 docker compose exec backend php bin/console cache:clear
 ```
@@ -132,11 +132,11 @@ No re-install is needed — the install command only needs to run once per user.
 Synaplan's plugin system requires zero core code changes to add a new plugin:
 
 1. **Boot** — `Kernel::getPlugins()` scans `/plugins/*/manifest.json` for plugin metadata
-2. **Autoloading** — PSR-4 mapping is registered: `Plugin\Marketeer\*` resolves to `plugins/marketeer/backend/*`
+2. **Autoloading** — PSR-4 mapping is registered: `Plugin\SynaAds\*` resolves to `plugins/synaads/backend/*`
 3. **Services** — All classes under `backend/` are autowired into Symfony's DI container
 4. **Routes** — Controller attributes in `backend/Controller/` are auto-imported
-5. **Security** — The public page endpoint (`/api/v1/marketeer/public/*`) is already configured in Synaplan's `security.yaml` for anonymous access
-6. **Per-user gate** — Every API call checks `BCONFIG P_marketeer.enabled = 1` for the requesting user
+5. **Security** — The public page endpoint (`/api/v1/synaads/public/*`) is already configured in Synaplan's `security.yaml` for anonymous access
+6. **Per-user gate** — Every API call checks `BCONFIG P_synaads.enabled = 1` for the requesting user
 
 ## Configuration
 
@@ -154,7 +154,7 @@ The plugin stores its settings per-user in the Synaplan database. Configure thes
 
 ## API Routes
 
-All endpoints are under `/api/v1/user/{userId}/plugins/marketeer/`:
+All endpoints are under `/api/v1/user/{userId}/plugins/synaads/`:
 
 | Method | Path | Description |
 |--------|------|-------------|

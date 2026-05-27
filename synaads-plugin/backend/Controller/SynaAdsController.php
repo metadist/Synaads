@@ -756,7 +756,7 @@ class SynaAdsController extends AbstractController
             return $this->json([
                 'success' => true,
                 'page' => $pageData,
-                'file' => "marketeer/{$campaignId}/{$language}/index.html",
+                'file' => "synaads/{$campaignId}/{$language}/index.html",
             ]);
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
@@ -1052,7 +1052,7 @@ class SynaAdsController extends AbstractController
                 return $this->json([
                     'success' => true,
                     'page' => $pageData,
-                    'file' => "marketeer/{$campaignId}/{$language}/index.html",
+                    'file' => "synaads/{$campaignId}/{$language}/index.html",
                 ]);
             }
 
@@ -1063,7 +1063,7 @@ class SynaAdsController extends AbstractController
                 'success' => true,
                 'keywords' => $keywords,
                 'count' => count($keywords),
-                'file' => "marketeer/{$campaignId}/{$language}/keywords.txt",
+                'file' => "synaads/{$campaignId}/{$language}/keywords.txt",
             ]);
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
@@ -1291,7 +1291,7 @@ class SynaAdsController extends AbstractController
                 'success' => true,
                 'keywords' => $keywords,
                 'count' => count($keywords),
-                'file' => "marketeer/{$campaignId}/{$language}/keywords.txt",
+                'file' => "synaads/{$campaignId}/{$language}/keywords.txt",
             ]);
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
