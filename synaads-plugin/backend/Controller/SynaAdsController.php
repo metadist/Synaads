@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Controller;
+namespace Plugin\SynaAds\Controller;
 
 use App\AI\Service\AiFacade;
 use App\Entity\PluginData;
@@ -15,13 +15,13 @@ use App\Service\PluginDataService;
 use App\Service\Exception\RateLimitExceededException;
 use App\Service\RateLimitService;
 use OpenApi\Attributes as OA;
-use Plugin\Marketeer\Service\AdCopyService;
-use Plugin\Marketeer\Service\ComplianceService;
-use Plugin\Marketeer\Service\ContentGenerator;
-use Plugin\Marketeer\Service\GoogleAdsEditorCsvBuilder;
-use Plugin\Marketeer\Service\GoogleAdsPlannerService;
-use Plugin\Marketeer\Service\LandingPageService;
-use Plugin\Marketeer\Service\MarketeerInstallService;
+use Plugin\SynaAds\Service\AdCopyService;
+use Plugin\SynaAds\Service\ComplianceService;
+use Plugin\SynaAds\Service\ContentGenerator;
+use Plugin\SynaAds\Service\GoogleAdsEditorCsvBuilder;
+use Plugin\SynaAds\Service\GoogleAdsPlannerService;
+use Plugin\SynaAds\Service\LandingPageService;
+use Plugin\SynaAds\Service\SynaAdsInstallService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -32,12 +32,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-#[Route('/api/v1/user/{userId}/plugins/marketeer', name: 'api_plugin_marketeer_')]
-#[OA\Tag(name: 'Marketeer Plugin')]
-class MarketeerController extends AbstractController
+#[Route('/api/v1/user/{userId}/plugins/synaads', name: 'api_plugin_synaads_')]
+#[OA\Tag(name: 'SynaAds Plugin')]
+class SynaAdsController extends AbstractController
 {
-    private const PLUGIN_NAME = 'marketeer';
-    private const CONFIG_GROUP = 'P_marketeer';
+    private const PLUGIN_NAME = 'synaads';
+    private const CONFIG_GROUP = 'P_synaads';
     private const DATA_TYPE_CAMPAIGN = 'campaign';
     private const DATA_TYPE_PAGE = 'page';
     private const DATA_TYPE_PUBLIC_PAGE = 'public_page';
@@ -48,7 +48,7 @@ class MarketeerController extends AbstractController
         private ModelConfigService $modelConfigService,
         private PluginDataService $pluginData,
         private PluginDataRepository $pluginDataRepository,
-        private MarketeerInstallService $installService,
+        private SynaAdsInstallService $installService,
         private ContentGenerator $contentGenerator,
         private LandingPageService $landingPageService,
         private AdCopyService $adCopyService,
@@ -68,10 +68,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/setup-check', name: 'setup_check', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/setup-check',
+        path: '/api/v1/user/{userId}/plugins/synaads/setup-check',
         summary: 'Check plugin setup status',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Setup status')]
     public function setupCheck(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -97,10 +97,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/setup', name: 'setup', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/setup',
+        path: '/api/v1/user/{userId}/plugins/synaads/setup',
         summary: 'Initialize plugin with example campaign',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Setup result')]
     public function setup(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -124,10 +124,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/config', name: 'config_get', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/config',
+        path: '/api/v1/user/{userId}/plugins/synaads/config',
         summary: 'Get plugin configuration',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Current configuration')]
     public function getConfig(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -144,10 +144,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/config', name: 'config_update', methods: ['PUT'])]
     #[OA\Put(
-        path: '/api/v1/user/{userId}/plugins/marketeer/config',
+        path: '/api/v1/user/{userId}/plugins/synaads/config',
         summary: 'Update plugin configuration',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Config updated')]
     public function updateConfig(
@@ -204,10 +204,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/config/default-prompt', name: 'config_default_prompt', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/config/default-prompt',
+        path: '/api/v1/user/{userId}/plugins/synaads/config/default-prompt',
         summary: 'Get the built-in default landing page prompt template',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Default prompt')]
     public function getDefaultPrompt(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -224,10 +224,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/config/default-media-prompts', name: 'config_default_media_prompts', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/config/default-media-prompts',
+        path: '/api/v1/user/{userId}/plugins/synaads/config/default-media-prompts',
         summary: 'Get the built-in default image and video prompt templates',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Default media prompts')]
     public function getDefaultMediaPrompts(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -249,10 +249,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/dashboard', name: 'dashboard', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/dashboard',
+        path: '/api/v1/user/{userId}/plugins/synaads/dashboard',
         summary: 'Campaign overview dashboard',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Dashboard data')]
     public function dashboard(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -317,10 +317,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/plan', name: 'plan_campaign', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/plan',
+        path: '/api/v1/user/{userId}/plugins/synaads/plan',
         summary: 'Generate a campaign plan from an idea',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         required: true,
@@ -367,7 +367,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer campaign planning failed', [
+            $this->logger->error('SynaAds campaign planning failed', [
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
             ]);
@@ -385,10 +385,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns', name: 'campaigns_list', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns',
         summary: 'List all campaigns',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Campaign list')]
     public function listCampaigns(int $userId, #[CurrentUser] ?User $user): JsonResponse
@@ -415,10 +415,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns', name: 'campaigns_create', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns',
         summary: 'Create a new campaign',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         required: true,
@@ -527,7 +527,7 @@ class MarketeerController extends AbstractController
         $this->pluginData->set($userId, self::PLUGIN_NAME, self::DATA_TYPE_CAMPAIGN, $slug, $campaign);
         $this->landingPageService->ensureCampaignDirectories($userId, $slug, $campaign['languages']);
 
-        $this->logger->info('Marketeer campaign created', ['user_id' => $userId, 'slug' => $slug]);
+        $this->logger->info('SynaAds campaign created', ['user_id' => $userId, 'slug' => $slug]);
 
         return $this->json([
             'success' => true,
@@ -537,10 +537,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}', name: 'campaigns_get', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}',
         summary: 'Get full campaign details with all assets',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Campaign details')]
     public function getCampaign(
@@ -589,10 +589,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}', name: 'campaigns_update', methods: ['PUT'])]
     #[OA\Put(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}',
         summary: 'Update campaign',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Campaign updated')]
     public function updateCampaign(
@@ -644,10 +644,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}', name: 'campaigns_delete', methods: ['DELETE'])]
     #[OA\Delete(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}',
         summary: 'Delete campaign and all generated assets',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Campaign deleted')]
     public function deleteCampaign(
@@ -671,7 +671,7 @@ class MarketeerController extends AbstractController
         $this->pluginData->delete($userId, self::PLUGIN_NAME, self::DATA_TYPE_CAMPAIGN, $campaignId);
         $this->landingPageService->deleteCampaignDirectory($userId, $campaignId);
 
-        $this->logger->info('Marketeer campaign deleted', ['user_id' => $userId, 'slug' => $campaignId]);
+        $this->logger->info('SynaAds campaign deleted', ['user_id' => $userId, 'slug' => $campaignId]);
 
         return $this->json(['success' => true, 'message' => "Campaign '{$campaignId}' deleted"]);
     }
@@ -682,10 +682,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/generate', name: 'generate_page', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/generate',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/generate',
         summary: 'Generate landing page HTML via AI',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -747,7 +747,7 @@ class MarketeerController extends AbstractController
             $this->pluginData->set($userId, self::PLUGIN_NAME, self::DATA_TYPE_PAGE, $pageKey, $pageData);
             $this->landingPageService->saveHtmlFile($userId, $campaignId, $language, $html);
 
-            $this->logger->info('Marketeer landing page generated', [
+            $this->logger->info('SynaAds landing page generated', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'language' => $language,
@@ -761,7 +761,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer page generation failed', [
+            $this->logger->error('SynaAds page generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -776,10 +776,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/pages/{language}', name: 'page_get', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/pages/{language}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/pages/{language}',
         summary: 'Get a specific generated page',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Page data')]
     public function getPage(
@@ -807,10 +807,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/pages/{language}', name: 'page_delete', methods: ['DELETE'])]
     #[OA\Delete(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/pages/{language}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/pages/{language}',
         summary: 'Delete a specific generated page',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Page deleted')]
     public function deletePage(
@@ -834,10 +834,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/pages/{language}/publish', name: 'page_publish', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/pages/{language}/publish',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/pages/{language}/publish',
         summary: 'Publish a landing page with a public slug URL',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -927,17 +927,17 @@ class MarketeerController extends AbstractController
         return $this->json([
             'success' => true,
             'published' => array_merge(['key' => $recordKey], $publicData),
-            'public_url' => '/api/v1/marketeer/public/' . $slug,
-            'absolute_public_url' => rtrim($request->getSchemeAndHttpHost(), '/') . '/api/v1/marketeer/public/' . $slug,
+            'public_url' => '/api/v1/synaads/public/' . $slug,
+            'absolute_public_url' => rtrim($request->getSchemeAndHttpHost(), '/') . '/api/v1/synaads/public/' . $slug,
         ]);
     }
 
     #[Route('/campaigns/{campaignId}/pages/{language}/publish', name: 'page_unpublish', methods: ['DELETE'])]
     #[OA\Delete(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/pages/{language}/publish',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/pages/{language}/publish',
         summary: 'Unpublish a landing page slug URL',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Page unpublished')]
     public function unpublishPage(
@@ -968,10 +968,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/refine', name: 'refine', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/refine',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/refine',
         summary: 'Refine generated content with follow-up prompt',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         required: true,
@@ -1068,7 +1068,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer refinement failed', [
+            $this->logger->error('SynaAds refinement failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -1087,10 +1087,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/generate-ad-copy', name: 'generate_ad_copy', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/generate-ad-copy',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/generate-ad-copy',
         summary: 'Generate ad copy for a platform (Google RSA, LinkedIn, Instagram, Facebook)',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         required: true,
@@ -1148,7 +1148,7 @@ class MarketeerController extends AbstractController
                 $this->adCopyService->saveSocialPost($userId, $campaignId, $platform, $language, $parsed);
             }
 
-            $this->logger->info('Marketeer ad copy generated', [
+            $this->logger->info('SynaAds ad copy generated', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'platform' => $platform,
@@ -1164,7 +1164,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer ad copy generation failed', [
+            $this->logger->error('SynaAds ad copy generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'platform' => $platform,
@@ -1180,10 +1180,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ad-copy', name: 'list_ad_copy', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ad-copy',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ad-copy',
         summary: 'List all ad copy and social posts for a campaign',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Ad copy and social posts')]
     public function listAdCopy(
@@ -1205,10 +1205,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ad-copy/{platform}/{language}', name: 'delete_ad_copy', methods: ['DELETE'])]
     #[OA\Delete(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ad-copy/{platform}/{language}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ad-copy/{platform}/{language}',
         summary: 'Delete ad copy for a specific platform and language',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Ad copy deleted')]
     public function deleteAdCopy(
@@ -1237,10 +1237,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/generate-keywords', name: 'generate_keywords', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/generate-keywords',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/generate-keywords',
         summary: 'Generate keyword list for Google Ads',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -1280,7 +1280,7 @@ class MarketeerController extends AbstractController
 
             $this->landingPageService->saveKeywordsFile($userId, $campaignId, $language, $keywords);
 
-            $this->logger->info('Marketeer keywords generated', [
+            $this->logger->info('SynaAds keywords generated', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'language' => $language,
@@ -1296,7 +1296,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer keyword generation failed', [
+            $this->logger->error('SynaAds keyword generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -1315,10 +1315,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/generate-image', name: 'generate_image', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/generate-image',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/generate-image',
         summary: 'Generate marketing image (hero, social, banner, icon)',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -1381,7 +1381,7 @@ class MarketeerController extends AbstractController
                     'provider' => $result['provider'] ?? null,
                 ]);
 
-                $this->logger->info('Marketeer image generated', [
+                $this->logger->info('SynaAds image generated', [
                     'user_id' => $userId,
                     'campaign' => $campaignId,
                     'type' => $imageType,
@@ -1403,7 +1403,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer image generation failed', [
+            $this->logger->error('SynaAds image generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -1422,10 +1422,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/generate-video', name: 'generate_video', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/generate-video',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/generate-video',
         summary: 'Generate a short promotional video clip (optional collateral)',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -1501,7 +1501,7 @@ class MarketeerController extends AbstractController
                 'provider' => $result['provider'] ?? null,
             ]);
 
-            $this->logger->info('Marketeer video generated', [
+            $this->logger->info('SynaAds video generated', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'duration' => $duration,
@@ -1518,7 +1518,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer video generation failed', [
+            $this->logger->error('SynaAds video generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -1533,10 +1533,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/share-video', name: 'share_video', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/share-video',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/share-video',
         summary: 'Copy a video from one language to all other campaign languages',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -1605,10 +1605,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns', name: 'ads_campaigns_list', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns',
         summary: 'List planned Google Ads campaigns',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Ads campaign list')]
     public function listAdsCampaigns(
@@ -1631,10 +1631,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns/generate', name: 'ads_campaigns_generate', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns/generate',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns/generate',
         summary: 'AI-generate a complete Google Ads campaign structure',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -1680,7 +1680,7 @@ class MarketeerController extends AbstractController
             $this->adsPlannerService->deleteForLanguage($userId, $campaignId, $language);
             $id = $this->adsPlannerService->create($userId, $campaignId, $structure);
 
-            $this->logger->info('Marketeer Google Ads campaign generated', [
+            $this->logger->info('SynaAds Google Ads campaign generated', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'ads_campaign_id' => $id,
@@ -1700,7 +1700,7 @@ class MarketeerController extends AbstractController
                 'error' => $e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer ads campaign generation failed', [
+            $this->logger->error('SynaAds ads campaign generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -1715,10 +1715,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns', name: 'ads_campaigns_create', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns',
         summary: 'Manually create a Google Ads campaign plan',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 201, description: 'Ads campaign created')]
     public function createAdsCampaign(
@@ -1756,10 +1756,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}', name: 'ads_campaigns_get', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}',
         summary: 'Get a specific ads campaign plan',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Ads campaign details')]
     public function getAdsCampaign(
@@ -1785,10 +1785,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}', name: 'ads_campaigns_update', methods: ['PUT'])]
     #[OA\Put(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}',
         summary: 'Update an ads campaign plan',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Ads campaign updated')]
     public function updateAdsCampaign(
@@ -1825,10 +1825,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}', name: 'ads_campaigns_delete', methods: ['DELETE'])]
     #[OA\Delete(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}',
         summary: 'Delete an ads campaign plan',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Ads campaign deleted')]
     public function deleteAdsCampaign(
@@ -1848,10 +1848,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}/export-keywords', name: 'ads_campaigns_export_keywords', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}/export-keywords',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/ads-campaigns/{adsCampaignId}/export-keywords',
         summary: 'Export keywords from ads campaign for Google Ads import',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Exported keywords')]
     public function exportAdsCampaignKeywords(
@@ -1880,10 +1880,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/compliance', name: 'compliance_check', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/compliance',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/compliance',
         summary: 'Quick GDPR/compliance check for campaign',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Compliance check results')]
     public function complianceCheck(
@@ -1913,10 +1913,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/compliance/ai-review', name: 'compliance_ai_review', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/compliance/ai-review',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/compliance/ai-review',
         summary: 'AI-powered deep compliance review',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -1958,7 +1958,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer compliance review failed', [
+            $this->logger->error('SynaAds compliance review failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -1973,10 +1973,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/compliance/cookie-snippet', name: 'compliance_cookie_snippet', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/compliance/cookie-snippet',
+        path: '/api/v1/user/{userId}/plugins/synaads/compliance/cookie-snippet',
         summary: 'Get a GDPR-compliant cookie consent HTML snippet',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Parameter(name: 'language', in: 'query', schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Cookie consent snippet')]
@@ -2012,10 +2012,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/checklist', name: 'pre_launch_checklist', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/checklist',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/checklist',
         summary: 'AI-powered pre-launch readiness check',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'Pre-launch checklist')]
     public function preLaunchChecklist(
@@ -2062,7 +2062,7 @@ class MarketeerController extends AbstractController
         } catch (RateLimitExceededException $e) {
             return $this->rateLimitExceededResponse($user, $e);
         } catch (\Throwable $e) {
-            $this->logger->error('Marketeer checklist generation failed', [
+            $this->logger->error('SynaAds checklist generation failed', [
                 'user_id' => $userId,
                 'campaign' => $campaignId,
                 'error' => $e->getMessage(),
@@ -2081,10 +2081,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/files', name: 'campaign_files', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/files',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/files',
         summary: 'List generated files for a campaign',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'File list')]
     public function listFiles(
@@ -2109,10 +2109,10 @@ class MarketeerController extends AbstractController
 
     #[Route('/campaigns/{campaignId}/download', name: 'campaign_download', methods: ['GET'])]
     #[OA\Get(
-        path: '/api/v1/user/{userId}/plugins/marketeer/campaigns/{campaignId}/download',
+        path: '/api/v1/user/{userId}/plugins/synaads/campaigns/{campaignId}/download',
         summary: 'Download campaign as ZIP file',
         security: [['ApiKey' => []]],
-        tags: ['Marketeer Plugin']
+        tags: ['SynaAds Plugin']
     )]
     #[OA\Response(response: 200, description: 'ZIP file download')]
     public function downloadZip(
@@ -2531,7 +2531,7 @@ class MarketeerController extends AbstractController
 
             return count($rewritten) === count($invalidIndexes) ? $rewritten : [];
         } catch (\Throwable $e) {
-            $this->logger->warning('Marketeer headline repair fallback used', [
+            $this->logger->warning('SynaAds headline repair fallback used', [
                 'user_id' => $user->getId(),
                 'language' => $language,
                 'error' => $e->getMessage(),
@@ -2721,7 +2721,7 @@ class MarketeerController extends AbstractController
             'model' => $response['model'] ?? $modelName ?? '',
             'input_text' => $inputText,
             'response_text' => (string) ($response['content'] ?? ''),
-            'source' => 'MARKETEER',
+            'source' => 'SYNAADS',
         ]);
 
         return $response;
@@ -2752,7 +2752,7 @@ class MarketeerController extends AbstractController
             'provider' => $result['provider'] ?? '',
             'model' => $result['model'] ?? '',
             'input_text' => $prompt,
-            'source' => 'MARKETEER',
+            'source' => 'SYNAADS',
         ]);
 
         return $result;
@@ -2782,7 +2782,7 @@ class MarketeerController extends AbstractController
             'provider' => $result['provider'] ?? '',
             'model' => $result['model'] ?? '',
             'input_text' => $prompt,
-            'source' => 'MARKETEER',
+            'source' => 'SYNAADS',
         ]);
 
         return $result;

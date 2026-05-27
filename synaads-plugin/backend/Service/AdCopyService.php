@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 use App\Service\PluginDataService;
 
@@ -16,7 +16,7 @@ use App\Service\PluginDataService;
  */
 final readonly class AdCopyService
 {
-    private const PLUGIN_NAME = 'marketeer';
+    private const PLUGIN_NAME = 'synaads';
     private const TYPE_AD_COPY = 'ad_copy';
     private const TYPE_SOCIAL_POST = 'social_post';
     private const TYPE_COLLATERAL = 'collateral';

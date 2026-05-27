@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 use App\Service\PluginDataService;
 
@@ -18,7 +18,7 @@ use App\Service\PluginDataService;
  */
 final readonly class GoogleAdsPlannerService
 {
-    private const PLUGIN_NAME = 'marketeer';
+    private const PLUGIN_NAME = 'synaads';
     private const DATA_TYPE = 'ads_campaign';
     private const DEFAULT_EU_POLITICAL_ADS = false;
     private const MAX_HEADLINE_LENGTH = 30;

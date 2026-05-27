@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 /**
  * Provides GDPR/privacy compliance utilities for marketing campaigns.

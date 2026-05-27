@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 /**
  * Builds AI prompts for landing pages, ad copy, social posts, keyword lists,

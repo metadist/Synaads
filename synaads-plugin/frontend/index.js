@@ -1,5 +1,5 @@
-const MK_VERSION = 'v1.0.5'
-const MK_BUILD = new Date().toISOString().replace(/[-T:]/g, (m) => m === 'T' ? '-' : m === '-' ? '' : '').slice(0, 15)
+const SA_VERSION = 'v1.0.5'
+const SA_BUILD = new Date().toISOString().replace(/[-T:]/g, (m) => m === 'T' ? '-' : m === '-' ? '' : '').slice(0, 15)
 
 const LANGS = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -142,7 +142,7 @@ function showUpgradePrompt(payload = {}) {
   modal.append(
     h('h3', null, 'Upgrade required'),
     h('p', { className: 'mk-modal-sub' },
-      payload.error || `${limitLine} Upgrade your account to continue using Marketeer AI features.`),
+      payload.error || `${limitLine} Upgrade your account to continue using SynaAds AI features.`),
     h('div', { className: 'mk-modal-actions' },
       h('button', {
         className: 'mk-btn mk-secondary',
@@ -165,7 +165,7 @@ function showUpgradePrompt(payload = {}) {
 }
 
 function createApi(baseUrl, userId) {
-  const url = (path) => `${baseUrl}/api/v1/user/${userId}/plugins/marketeer${path}`
+  const url = (path) => `${baseUrl}/api/v1/user/${userId}/plugins/synaads${path}`
   let refreshPromise = null
 
   async function refreshToken() {
@@ -346,7 +346,7 @@ export default {
 
     const root = h('div', { className: 'mk' })
     el.append(root)
-    el.append(h('div', { style: { padding: '6px 2px 0', fontSize: '10px', opacity: 0.4, color: '#888' } }, `Marketeer ${MK_VERSION} · ${MK_BUILD}`))
+    el.append(h('div', { style: { padding: '6px 2px 0', fontSize: '10px', opacity: 0.4, color: '#888' } }, `SynaAds ${SA_VERSION} · ${SA_BUILD}`))
 
     let cachedConfig = null
 
@@ -910,7 +910,7 @@ export default {
         if (page) {
           const htmlUrl = fileUrl(campaign.id, lang + '/index.html')
           const published = publishedPages[lang] || null
-          const publicUrl = published?.slug ? `${context.apiBaseUrl}/api/v1/marketeer/public/${published.slug}` : ''
+          const publicUrl = published?.slug ? `${context.apiBaseUrl}/api/v1/synaads/public/${published.slug}` : ''
           const previewFrame = h('div', { className: 'mk-preview', style: { marginTop: '12px', position: 'relative' } })
           const iframe = h('iframe', { sandbox: 'allow-same-origin allow-scripts allow-popups', style: { width: '100%', height: '500px', border: 'none' } })
           previewFrame.append(iframe)
@@ -1150,7 +1150,7 @@ export default {
     // ── Images Tab ───────────────────────────────────────────────────────
 
     function fileUrl(campaignId, relativePath) {
-      return `${context.apiBaseUrl}/api/v1/user/${context.userId}/plugins/marketeer/campaigns/${campaignId}/file/${relativePath}`
+      return `${context.apiBaseUrl}/api/v1/user/${context.userId}/plugins/synaads/campaigns/${campaignId}/file/${relativePath}`
     }
 
     function renderImagesTab(ct, campaign, data) {

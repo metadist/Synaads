@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Controller;
+namespace Plugin\SynaAds\Controller;
 
 use App\Entity\PluginData;
 use App\Entity\User;
 use App\Repository\PluginDataRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Plugin\Marketeer\Service\LandingPageService;
+use Plugin\SynaAds\Service\LandingPageService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-#[Route('/api/v1/marketeer', name: 'api_marketeer_public_')]
-class MarketeerPublicController extends AbstractController
+#[Route('/api/v1/synaads', name: 'api_synaads_public_')]
+class SynaAdsPublicController extends AbstractController
 {
-    private const PLUGIN_NAME = 'marketeer';
+    private const PLUGIN_NAME = 'synaads';
     private const DATA_TYPE_PUBLIC_PAGE = 'public_page';
 
     public function __construct(
@@ -100,7 +100,7 @@ class MarketeerPublicController extends AbstractController
                 'updated_at' => $data['updated_at'] ?? null,
                 'view_count' => (int) ($data['view_count'] ?? 0),
                 'last_accessed_at' => $data['last_accessed_at'] ?? null,
-                'public_url' => '/api/v1/marketeer/public/' . ($data['slug'] ?? ''),
+                'public_url' => '/api/v1/synaads/public/' . ($data['slug'] ?? ''),
             ];
         }
 

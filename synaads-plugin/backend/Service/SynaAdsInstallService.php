@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 use App\Service\PluginDataService;
 
 /**
- * Seeds default data when the Marketeer plugin is installed for a user.
+ * Seeds default data when the SynaAds plugin is installed for a user.
  */
-final readonly class MarketeerInstallService
+final readonly class SynaAdsInstallService
 {
-    private const PLUGIN_NAME = 'marketeer';
+    private const PLUGIN_NAME = 'synaads';
     private const DATA_TYPE_CAMPAIGN = 'campaign';
 
     public function __construct(

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 use App\Service\File\UserUploadPathBuilder;
 use Psr\Log\LoggerInterface;
@@ -211,7 +211,7 @@ final readonly class LandingPageService
 
         @rmdir($dir);
 
-        $this->logger->info('Marketeer campaign directory deleted', [
+        $this->logger->info('SynaAds campaign directory deleted', [
             'user_id' => $userId,
             'campaign' => $campaignSlug,
             'path' => $dir,

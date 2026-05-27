@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plugin\Marketeer\Service;
+namespace Plugin\SynaAds\Service;
 
 /**
  * Builds a Google Ads Editor-compatible TSV from a campaign data array.
