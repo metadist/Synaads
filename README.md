@@ -38,7 +38,7 @@ Synaplan uses **automatic plugin discovery** — no config file edits are needed
 
 ```bash
 git clone https://github.com/metadist/synaplan.git
-git clone https://github.com/metadist/synaplan-synaads.git
+git clone https://github.com/metadist/Synaads.git synaplan-synaads
 ```
 
 Your directory layout should look like:
