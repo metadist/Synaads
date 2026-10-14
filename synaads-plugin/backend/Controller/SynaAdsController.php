@@ -9,7 +9,7 @@ use App\Entity\PluginData;
 use App\Entity\User;
 use App\Repository\ConfigRepository;
 use App\Repository\PluginDataRepository;
-use App\Service\TokenService;
+use App\Service\Auth\TokenService;
 use App\Service\ModelConfigService;
 use App\Service\PluginDataService;
 use App\Service\Exception\RateLimitExceededException;
